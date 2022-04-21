@@ -125,7 +125,10 @@ pub const DAYS: BlockNumber = HOURS * 24;
 /// The version information used to identify this runtime when compiled natively.
 #[cfg(feature = "std")]
 pub fn native_version() -> NativeVersion {
-	NativeVersion { runtime_version: VERSION, can_author_with: Default::default() }
+	NativeVersion {
+		runtime_version: VERSION,
+		can_author_with: Default::default(),
+	}
 }
 
 const NORMAL_DISPATCH_RATIO: Perbill = Perbill::from_percent(75);
@@ -249,6 +252,130 @@ impl pallet_balances::Config for Runtime {
 	type WeightInfo = pallet_balances::weights::SubstrateWeight<Runtime>;
 }
 
+/// Pallet Democracy
+///
+parameter_types! {
+	pub const DemocracyMaxVotes: u32 = 1;
+	pub const DemocracyMaxProposals: u32 = 1;
+}
+
+impl pallet_democracy::Config for Runtime {
+	type Proposal: Proposal;
+	type Event: Event;
+	/// Currency type for this pallet.
+	type Currency: Balances;
+
+	/// The period between a proposal being approved and enacted.
+	///
+	/// It should generally be a little more than the unstake period to ensure that
+	/// voting stakers have an opportunity to remove themselves from the system in the case
+	/// where they are on the losing side of a vote.
+	#[pallet::constant]
+	type EnactmentPeriod: Get<Self::BlockNumber>;
+
+	/// How often (in blocks) new public referenda are launched.
+	#[pallet::constant]
+	type LaunchPeriod: Get<Self::BlockNumber>;
+
+	/// How often (in blocks) to check for new votes.
+	#[pallet::constant]
+	type VotingPeriod: Get<Self::BlockNumber>;
+
+	/// The minimum period of vote locking.
+	///
+	/// It should be no shorter than enactment period to ensure that in the case of an approval,
+	/// those successful voters are locked into the consequences that their votes entail.
+	#[pallet::constant]
+	type VoteLockingPeriod: Get<Self::BlockNumber>;
+
+	/// The minimum amount to be used as a deposit for a public referendum proposal.
+	#[pallet::constant]
+	type MinimumDeposit: Get<BalanceOf<Self>>;
+
+	/// Origin from which the next tabled referendum may be forced. This is a normal
+	/// "super-majority-required" referendum.
+	type ExternalOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Origin from which the next tabled referendum may be forced; this allows for the tabling
+	/// of a majority-carries referendum.
+	type ExternalMajorityOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Origin from which the next tabled referendum may be forced; this allows for the tabling
+	/// of a negative-turnout-bias (default-carries) referendum.
+	type ExternalDefaultOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Origin from which the next majority-carries (or more permissive) referendum may be
+	/// tabled to vote according to the `FastTrackVotingPeriod` asynchronously in a similar
+	/// manner to the emergency origin. It retains its threshold method.
+	type FastTrackOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Origin from which the next majority-carries (or more permissive) referendum may be
+	/// tabled to vote immediately and asynchronously in a similar manner to the emergency
+	/// origin. It retains its threshold method.
+	type InstantOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Indicator for whether an emergency origin is even allowed to happen. Some chains may
+	/// want to set this permanently to `false`, others may want to condition it on things such
+	/// as an upgrade having happened recently.
+	#[pallet::constant]
+	type InstantAllowed: Get<bool>;
+
+	/// Minimum voting period allowed for a fast-track referendum.
+	#[pallet::constant]
+	type FastTrackVotingPeriod: Get<Self::BlockNumber>;
+
+	/// Origin from which any referendum may be cancelled in an emergency.
+	type CancellationOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Origin from which proposals may be blacklisted.
+	type BlacklistOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Origin from which a proposal may be cancelled and its backers slashed.
+	type CancelProposalOrigin: EnsureOrigin<Self::Origin>;
+
+	/// Origin for anyone able to veto proposals.
+	///
+	/// # Warning
+	///
+	/// The number of Vetoers for a proposal must be small, extrinsics are weighted according to
+	/// [MAX_VETOERS](./const.MAX_VETOERS.html)
+	type VetoOrigin: EnsureOrigin<Self::Origin, Success = Self::AccountId>;
+
+	/// Period in blocks where an external proposal may not be re-submitted after being vetoed.
+	#[pallet::constant]
+	type CooloffPeriod: Get<Self::BlockNumber>;
+
+	/// The amount of balance that must be deposited per byte of preimage stored.
+	#[pallet::constant]
+	type PreimageByteDeposit: Get<BalanceOf<Self>>;
+
+	/// An origin that can provide a preimage using operational extrinsics.
+	type OperationalPreimageOrigin: EnsureOrigin<Self::Origin, Success = Self::AccountId>;
+
+	/// Handler for the unbalanced reduction when slashing a preimage deposit.
+	type Slash: OnUnbalanced<NegativeImbalanceOf<Self>>;
+
+	/// The Scheduler.
+	type Scheduler: ScheduleNamed<Self::BlockNumber, Self::Proposal, Self::PalletsOrigin>;
+
+	/// Overarching type of all pallets origins.
+	type PalletsOrigin: From<frame_system::RawOrigin<Self::AccountId>>;
+
+	/// The maximum number of votes for an account.
+	///
+	/// Also used to compute weight, an overly big value can
+	/// lead to extrinsic with very big weight: see `delegate` for instance.
+	#[pallet::constant]
+	type MaxVotes: DemocracyMaxVotes;
+
+	/// Weight information for extrinsics in this pallet.
+	type WeightInfo: WeightInfo;
+
+	/// The maximum number of public proposals that can exist at any time.
+	#[pallet::constant]
+	type MaxProposals: DemocracyMaxProposals;
+}
+
 parameter_types! {
 	pub const TransactionByteFee: Balance = 1;
 }
@@ -288,6 +415,8 @@ construct_runtime!(
 		Sudo: pallet_sudo,
 		// Include the custom logic from the pallet-template in the runtime.
 		Votechain: pallet_votechain,
+		// Pallet Democracy
+		Democracy: pallet_democracy,
 	}
 );
 
