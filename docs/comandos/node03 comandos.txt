@@ -1,0 +1,36 @@
+./node-votechain \
+--base-path /tmp/votechain \
+--chain ./customSpecRaw.json \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--rpc-methods Unsafe \
+--name Node03 \
+--bootnodes /ip4/192.168.8.119/tcp/30333/p2p/12D3KooWSjmTfQncLHhARpjpQHRRnpnhMCgFVBH1V2QkYsQznpEy \
+--password-interactive
+
+
+./node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Sr25519 \
+--suri "team party surround cute album moon eight unable guilt festival truly seek" \
+--password-interactive \
+--key-type aura
+
+./node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Ed25519 \
+--suri "team party surround cute album moon eight unable guilt festival truly seek" \
+--password-interactive \
+--key-type gran
+
+./node-votechain \
+--base-path /tmp/votechain \
+--chain ./customSpecRaw.json \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--rpc-methods Unsafe \
+--name Node03 \
+--bootnodes /ip4/192.168.8.119/tcp/30333/p2p/12D3KooWSjmTfQncLHhARpjpQHRRnpnhMCgFVBH1V2QkYsQznpEy \
+--password-interactive

@@ -1,8 +1,13 @@
 [workspace]
 members = [
-    'node',
-    'pallets/votechain',
-    'runtime',
+	"bench",
+	"cli",
+	"executor",
+	"primitives",
+	"rpc",
+	"runtime",
+	"testing",
+    "pallets/votechain",
 ]
 [profile.release]
 panic = "unwind"

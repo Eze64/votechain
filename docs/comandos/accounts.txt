@@ -1,0 +1,73 @@
++-----------------------------------------------------------------------------------------+
+# Account 1
++-----------------------------------------------------------------------------------------+
+
+# Sr25519 for aura
+
+Secret phrase:       safe fun child account immense solution easy fire unable guide proud fatal
+  Secret seed:       0xfdfe1fd5df8cd507ac320b19c29fade264b5232a300f4820c36cbff9a1de9e62
+  Public key (hex):  0x981b37f3bf94e169a79c0a743f5c66dd46bb68891abc15193efb43c8e90a732d
+  Account ID:        0x981b37f3bf94e169a79c0a743f5c66dd46bb68891abc15193efb43c8e90a732d
+  Public key (SS58): 5FW9DnVmccczQ1vJ2bhFdK31aoe1cGS9dDmFHRpufeQiL45b
+  SS58 Address:      5FW9DnVmccczQ1vJ2bhFdK31aoe1cGS9dDmFHRpufeQiL45b
+
+# Ed25519 for grandpa
+
+Secret phrase:       safe fun child account immense solution easy fire unable guide proud fatal
+  Secret seed:       0xfdfe1fd5df8cd507ac320b19c29fade264b5232a300f4820c36cbff9a1de9e62
+  Public key (hex):  0xe4a82a4130947d05b5cfbe5330f898b3be599761b33c16dd4ad495f73c9ad5e3
+  Account ID:        0xe4a82a4130947d05b5cfbe5330f898b3be599761b33c16dd4ad495f73c9ad5e3
+  Public key (SS58): 5HEWjK5j79MfwwM7FtzyQtH1AFfFApMYk2EkZBi7jf9Kr4zs
+  SS58 Address:      5HEWjK5j79MfwwM7FtzyQtH1AFfFApMYk2EkZBi7jf9Kr4zs
+  
+WS id: 	      12D3KooWSjmTfQncLHhARpjpQHRRnpnhMCgFVBH1V2QkYsQznpEy
+
++-----------------------------------------------------------------------------------------+
+# Account 2
++-----------------------------------------------------------------------------------------+
+
+# Sr25519 for aura
+
+Secret phrase:       swamp imitate innocent flash dinner used brother report spray mask awkward slam
+  Secret seed:       0x3324ea49d3f951f09c3c3225b89ad4d51e095be118370e85444dd6a1233d5833
+  Public key (hex):  0xfc372a89d45e3eb4f519bdb95774db5f4e206bc743dc8fa30b4bfbbf7b3ec179
+  Account ID:        0xfc372a89d45e3eb4f519bdb95774db5f4e206bc743dc8fa30b4bfbbf7b3ec179
+  Public key (SS58): 5HmQK3RDk1BXn9fuqC3b15p5oyekDQq9G7w6VXew5aZL9SpG
+  SS58 Address:      5HmQK3RDk1BXn9fuqC3b15p5oyekDQq9G7w6VXew5aZL9SpG
+
+# Ed25519 for grandpa
+
+Secret phrase:       swamp imitate innocent flash dinner used brother report spray mask awkward slam
+  Secret seed:       0x3324ea49d3f951f09c3c3225b89ad4d51e095be118370e85444dd6a1233d5833
+  Public key (hex):  0x31220252bc083990ce146aa1c270462b1244317500b28d42ebd20b0e6549d90c
+  Account ID:        0x31220252bc083990ce146aa1c270462b1244317500b28d42ebd20b0e6549d90c
+  Public key (SS58): 5DB8JihfYdkbnyuG8PnxJ6hMm6d1prjdNx57rTiH8WGnjbdw
+  SS58 Address:      5DB8JihfYdkbnyuG8PnxJ6hMm6d1prjdNx57rTiH8WGnjbdw
+
++-----------------------------------------------------------------------------------------+
+# Account 3
++-----------------------------------------------------------------------------------------+
+
+# Sr25519 for aura
+
+Secret phrase:       team party surround cute album moon eight unable guilt festival truly seek
+  Secret seed:       0xc0687e6aa5a1327c53ed6f4a118fe2aac1fdb2f98018afacedbeebbdfa9c52bb
+  Public key (hex):  0x9c2300bfe2945470ac7ffac14e0ae0884bba78777445486af5cacd3c15730d39
+  Account ID:        0x9c2300bfe2945470ac7ffac14e0ae0884bba78777445486af5cacd3c15730d39
+  Public key (SS58): 5FbRj1sxwxnLDEtDveUG1kSy6Yt7vBQSDcA9SDk3hmNHA2gb
+  SS58 Address:      5FbRj1sxwxnLDEtDveUG1kSy6Yt7vBQSDcA9SDk3hmNHA2gb
+
+# Ed25519 for grandpa
+
+Secret phrase:       team party surround cute album moon eight unable guilt festival truly seek
+  Secret seed:       0xc0687e6aa5a1327c53ed6f4a118fe2aac1fdb2f98018afacedbeebbdfa9c52bb
+  Public key (hex):  0x25fd9615b7668ca4074e4c6499e2863e202b95247b3f4c05d5caa10e5cd1d52f
+  Account ID:        0x25fd9615b7668ca4074e4c6499e2863e202b95247b3f4c05d5caa10e5cd1d52f
+  Public key (SS58): 5CvWxcreA91GaZcCCUccJXkXACodHY842qRpykdrbNiFqXzd
+  SS58 Address:      5CvWxcreA91GaZcCCUccJXkXACodHY842qRpykdrbNiFqXzd
+
+
+
+
+
+

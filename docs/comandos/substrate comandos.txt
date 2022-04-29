@@ -1,0 +1,146 @@
++-----------------------------------------------------------------------------------------+
+# Iniciar nodes com contas predefinidas
++-----------------------------------------------------------------------------------------+
+# Node Genesis
+
+./node-votechain \
+--base-path /tmp/votechain \
+--chain local \
+--alice \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--node-key 0000000000000000000000000000000000000000000000000000000000000001 \
+--validator
+
+# Normal Node
+
+./node-votechain \
+--base-path /tmp/votechain \
+--chain local \
+--bob \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--validator \
+--bootnodes /ip4/127.0.0.1/tcp/30333/p2p/12D3KooWEyoppNCUx8Yx66oV9fJnriXwCcXwDDUA2kj6vnc6iDEp
+
++-----------------------------------------------------------------------------------------+
+# Limpar base de dados da blockchain
++-----------------------------------------------------------------------------------------+
+
+./target/release/node-votechain purge-chain --base-path /tmp/votechain --chain local -y
+
++-----------------------------------------------------------------------------------------+
+# Gerar chaves usando modelo de nó
++-----------------------------------------------------------------------------------------+
+
+# Sr25519 for aura
+./target/release/node-votechain key generate --scheme Sr25519 --password-interactive
+# Ed25519 for grandpa
+./target/release/node-votechain key inspect --password-interactive --scheme Ed25519 "--secret phrase--"
+
++-----------------------------------------------------------------------------------------+
+# Exportar especificação da chain para criar uma custom chain
++-----------------------------------------------------------------------------------------+
+
+./target/release/node-votechain build-spec --disable-default-bootnode --chain local > customSpec.json
+
++-----------------------------------------------------------------------------------------+
+# Converter customSpec.json para um formato bruto, para poder ser usado
++-----------------------------------------------------------------------------------------+
+
+./target/release/node-votechain build-spec --chain=customSpec.json --raw --disable-default-bootnode > customSpecRaw.json
+
++-----------------------------------------------------------------------------------------+
+# Iniciar primeiro node
++-----------------------------------------------------------------------------------------+
+
+./target/release/node-votechain \
+--base-path /tmp/votechain \
+--chain ./customSpecRaw.json \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--validator \
+--rpc-methods Unsafe \
+--name Node01
+
+# Adicionar keystore ao Node01
+
+./target/release/node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Sr25519 \
+--suri <your-secret-seed> \
+--password-interactive \
+--key-type aura
+
+./target/release/node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Ed25519 \
+--suri <your-secret-key> \
+--password-interactive \
+--key-type gran
+
+# Checar as chaves adicionadas
+
+ls /tmp/votechain/chains/votechain_net/keystore
+
++-----------------------------------------------------------------------------------------+
+# Iniciar outros nodes
++-----------------------------------------------------------------------------------------+
+
+./target/release/node-votechain \
+--base-path /tmp/votechain \
+--chain ./customSpecRaw.json \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--validator \
+--rpc-methods Unsafe \
+--name Node02 \
+--bootnodes /ip4/127.0.0.1/tcp/30333/p2p/<--p2p id--> \
+--password-interactive
+
+# Adicionar keystore ao Node02
+
+./target/release/node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Sr25519 \
+--suri <second-participant-secret-seed> \
+--password-interactive \
+--key-type aura
+
+./target/release/node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Ed25519 \
+--suri <second-participant-secret-seed> \
+--password-interactive \
+--key-type gran
+
+# Checar as chaves adicionadas
+
+ls /tmp/votechain/chains/votechain_net/keystore
+
++-----------------------------------------------------------------------------------------+
+# Reiniciar nodes
++-----------------------------------------------------------------------------------------+
+
+./target/release/node-votechain \
+--base-path /tmp/votechain \
+--chain ./customSpecRaw.json \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--validator \
+--rpc-methods Unsafe \
+--name Node02 \
+--bootnodes /ip4/127.0.0.1/tcp/30333/p2p/<--p2p id--> \
+--password-interactive
+
+
+
+
+
+
+

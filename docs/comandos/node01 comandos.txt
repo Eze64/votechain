@@ -1,0 +1,34 @@
+./node-votechain \
+--base-path /tmp/votechain \
+--chain ./customSpecRaw.json \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--validator \
+--rpc-methods Unsafe \
+--name Node01
+
+./node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Sr25519 \
+--suri "safe fun child account immense solution easy fire unable guide proud fatal" \
+--password-interactive \
+--key-type aura
+
+./node-votechain key insert --base-path /tmp/votechain \
+--chain customSpecRaw.json \
+--scheme Ed25519 \
+--suri "safe fun child account immense solution easy fire unable guide proud fatal" \
+--password-interactive \
+--key-type gran
+
+./node-votechain \
+--base-path /tmp/votechain \
+--chain ./customSpecRaw.json \
+--port 30333 \
+--ws-port 9945 \
+--rpc-port 9933 \
+--validator \
+--rpc-methods Unsafe \
+--name Node01 \
+--password-interactive
