@@ -79,6 +79,9 @@ use sp_runtime::generic::Era;
 /// Generated voter bag information.
 mod voter_bags;
 
+// Inport the Votechain pallet
+pub use pallet_votechain;
+
 // Make the WASM binary available.
 #[cfg(feature = "std")]
 include!(concat!(env!("OUT_DIR"), "/wasm_binary.rs"));
@@ -96,8 +99,8 @@ pub fn wasm_binary_unwrap() -> &'static [u8] {
 /// Runtime version.
 #[sp_version::runtime_version]
 pub const VERSION: RuntimeVersion = RuntimeVersion {
-	spec_name: create_runtime_str!("node"),
-	impl_name: create_runtime_str!("substrate-node"),
+	spec_name: create_runtime_str!("node-votechain"),
+	impl_name: create_runtime_str!("node-votechain"),
 	authoring_version: 10,
 	// Per convention: if the runtime behavior changes, increment spec_version
 	// and set impl_version to 0. If only runtime
@@ -173,6 +176,10 @@ parameter_types! {
 		})
 		.avg_block_initialization(AVERAGE_ON_INITIALIZE_RATIO)
 		.build_or_panic();
+	pub const ElectionMinBytes: u32 = 8;
+	pub const ElectionMaxBytes: u32 = 4096;
+	pub const CandidateMinBytes: u32 = 8;
+	pub const CandidateMaxBytes: u32 = 4096;
 }
 
 const_assert!(NORMAL_DISPATCH_RATIO.deconstruct() >= AVERAGE_ON_INITIALIZE_RATIO.deconstruct());
@@ -1341,6 +1348,15 @@ impl pallet_transaction_storage::Config for Runtime {
 	type WeightInfo = pallet_transaction_storage::weights::SubstrateWeight<Runtime>;
 }
 
+impl pallet_votechain::Config for Runtime {
+	type Event = Event;
+	type Currency = Balances;
+	type ElectionMinBytes = ElectionMinBytes;
+	type ElectionMaxBytes = ElectionMaxBytes;
+	type CandidateMinBytes = CandidateMinBytes;
+	type CandidateMaxBytes = CandidateMaxBytes;
+}
+
 construct_runtime!(
 	pub enum Runtime where
 		Block = Block,
@@ -1395,6 +1411,7 @@ construct_runtime!(
 		ChildBounties: pallet_child_bounties,
 		Referenda: pallet_referenda,
 		ConvictionVoting: pallet_conviction_voting,
+		Votechain: pallet_votechain,
 	}
 );
 
@@ -1493,6 +1510,7 @@ mod benches {
 		[pallet_uniques, Uniques]
 		[pallet_utility, Utility]
 		[pallet_vesting, Vesting]
+		[pallet_votechain, Votechain]
 	);
 }
 

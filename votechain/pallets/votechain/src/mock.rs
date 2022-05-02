@@ -18,9 +18,11 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
-		TemplateModule: pallet_votechain::{Pallet, Call, Storage, Event<T>},
+		Votechain: pallet_votechain::{Pallet, Call, Storage, Event<T>},
 	}
 );
+
+
 
 impl system::Config for Test {
 	type BaseCallFilter = frame_support::traits::Everything;
@@ -51,6 +53,11 @@ impl system::Config for Test {
 
 impl pallet_votechain::Config for Test {
 	type Event = Event;
+	type Currency = Balances;
+	type ElectionMinBytes = ElectionMinBytes;
+	type ElectionMaxBytes = ElectionMaxBytes;
+	type CandidateMinBytes = CandidateMinBytes;
+	type CandidateMaxBytes = CandidateMaxBytes;
 }
 
 // Build genesis storage according to the mock runtime.
