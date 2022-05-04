@@ -39,11 +39,10 @@ pub mod pallet {
 		type CandidateMaxBytes: Get<u32>;
 	}
 
-	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
+	#[derive(Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
-	pub struct Election<T: Config> {
+	pub struct Election {
 		pub description: Vec<u8>,
-		pub author: <T as frame_system::Config>::AccountId,
 	}
 
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
@@ -51,7 +50,6 @@ pub mod pallet {
 	pub struct Candidate<T: Config> {
 		pub candidate_name: Vec<u8>,
 		pub election_id: T::Hash,
-		pub author: <T as frame_system::Config>::AccountId,
 	}
 
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
@@ -77,15 +75,23 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn elections)]
-	pub(super) type Elections<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Election<T>>;
+	pub(super) type Elections<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Election>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn election_candidates)]
+	pub(super) type ElectionCandidates<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Candidate<T>>>;
+
+	#[pallet::storage]
+	#[pallet::getter(fn election_votes)]
+	pub(super) type ElectionVotes<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Vote<T>>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn candidates)]
-	pub(super) type Candidates<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Candidate<T>>>;
+	pub(super) type Candidates<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Candidate<T>>;
 
 	#[pallet::storage]
-	#[pallet::getter(fn votes)]
-	pub(super) type Votes<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Vote<T>>>;
+	#[pallet::getter(fn candidate_votes)]
+	pub(super) type CandidateVotes<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Vote<T>>>;
 
 	// Pallets use events to inform users when important changes are made.
 	// https://docs.substrate.io/v3/runtime/events-and-errors
@@ -95,9 +101,9 @@ pub mod pallet {
 		/// Event documentation should end with an array that provides descriptive names for event
 		/// parameters. [something, who]
 		SomethingStored(u32, T::AccountId),
-		ElectionStored(Vec<u8>, T::AccountId, T::Hash),
-		CandidateStored(Vec<u8>, T::AccountId, T::Hash),
-		VoteStored(T::Hash, T::AccountId, T::Hash),
+		ElectionStored(Vec<u8>, T::Hash),
+		CandidateStored(Vec<u8>, T::Hash),
+		VoteStored(T::Hash, T::Hash),
 	}
 
 	// Errors inform users that something went wrong.
@@ -113,6 +119,7 @@ pub mod pallet {
 		CandidateTooManyBytes,
 		ElectionNotFound,
 		CandidateNotFound,
+		OriginNotSudo,
 	}
 
 	// Dispatchable functions allows users to interact with the pallet and invoke state changes.
@@ -157,10 +164,10 @@ pub mod pallet {
 			}
 		}
 
-		#[pallet::weight(10000)]
+		#[pallet::weight(10_000)]
 		#[transactional]
 		pub fn create_election(origin: OriginFor<T>, description: Vec<u8>) -> DispatchResult {
-			let author = ensure_signed(origin)?;
+			ensure_root(origin)?;
 
 			ensure!(
 				(description.len() as u32) > T::ElectionMinBytes::get(),
@@ -174,30 +181,30 @@ pub mod pallet {
 
 			let election = Election {
 				description: description.clone(),
-				author: author.clone(),
 			};
 
 			let election_id = T::Hashing::hash_of(&election);
 			<Elections<T>>::insert(election_id, election);
 
-			let candidates_vec: Vec<Candidate<T>> = Vec::new();
-			<Candidates<T>>::insert(election_id, candidates_vec);
+			let election_candidates_vec: Vec<Candidate<T>> = Vec::new();
+			<ElectionCandidates<T>>::insert(election_id, election_candidates_vec);
 
-			let votes_vec: Vec<Vote<T>> = Vec::new();
-			<Votes<T>>::insert(election_id, votes_vec);
+			let election_votes_vec: Vec<Vote<T>> = Vec::new();
+			<ElectionVotes<T>>::insert(election_id, election_votes_vec);
 
-			Self::deposit_event(Event::ElectionStored(description, author, election_id));
+			Self::deposit_event(Event::ElectionStored(description, election_id));
 
 			Ok(())
 		}
 
-		#[pallet::weight(5000)]
+		#[pallet::weight(5_000)]
 		pub fn create_candidate(
 			origin: OriginFor<T>,
 			candidate_name: Vec<u8>,
 			election_id: T::Hash,
 		) -> DispatchResult {
-			let author = ensure_signed(origin)?;
+			ensure_root(origin)?;
+
 			ensure!(
 				(candidate_name.len() as u32) > T::CandidateMinBytes::get(),
 				<Error<T>>::CandidateNotEnoughBytes
@@ -206,25 +213,32 @@ pub mod pallet {
 				(candidate_name.len() as u32) < T::CandidateMaxBytes::get(),
 				<Error<T>>::CandidateTooManyBytes
 			);
+			
 			let candidate = Candidate {
-				author: author.clone(),
 				candidate_name: candidate_name.clone(),
 				election_id: election_id.clone(),
 			};
-			<Candidates<T>>::mutate(election_id, |candidates| match candidates {
+			let candidate_id = T::Hashing::hash_of(&candidate);
+			let candidate_votes_vec: Vec<Vote<T>> = Vec::new();
+
+			<ElectionCandidates<T>>::mutate(election_id, |election_candidates| match election_candidates {
 				None => Err(()),
 				Some(vec) => {
-					vec.push(candidate);
+					vec.push(candidate.clone());
+
+					<Candidates<T>>::insert(candidate_id, candidate);
+					<CandidateVotes<T>>::insert(candidate_id, candidate_votes_vec);
+
 					Ok(())
 				}
 			})
 			.map_err(|_| <Error<T>>::ElectionNotFound)?;
 
-			Self::deposit_event(Event::CandidateStored(candidate_name, author, election_id));
+			Self::deposit_event(Event::CandidateStored(candidate_name, candidate_id));
 			Ok(())
 		}
 
-		#[pallet::weight(5000)]
+		#[pallet::weight(5_000)]
 		pub fn create_vote(
 			origin: OriginFor<T>,
 			candidate_id: T::Hash,
@@ -237,16 +251,38 @@ pub mod pallet {
 				candidate_id: candidate_id.clone(),
 				election_id: election_id.clone(),
 			};
-			<Votes<T>>::mutate(election_id, |votes| match votes {
+
+			<ElectionVotes<T>>::mutate(election_id, |election_votes| match election_votes {
+				None => Err(()),
+				Some(vec) => {
+					let mut vote_exists: bool = false;
+
+					for x in vec.clone() {
+						if x.author == vote_author {
+							vote_exists = true;
+						}
+					}
+
+					if vote_exists {
+						Err(())
+					} else {
+						vec.push(vote.clone());
+						Ok(())
+					}
+				}
+			})
+			.map_err(|_| <Error<T>>::ElectionNotFound)?;
+
+			<CandidateVotes<T>>::mutate(candidate_id, |candidate_votes| match candidate_votes {
 				None => Err(()),
 				Some(vec) => {
 					vec.push(vote);
 					Ok(())
 				}
 			})
-			.map_err(|_| <Error<T>>::ElectionNotFound)?;
+			.map_err(|_| <Error<T>>::CandidateNotFound)?;
 
-			Self::deposit_event(Event::VoteStored(candidate_id, vote_author, election_id));
+			Self::deposit_event(Event::VoteStored(election_id, candidate_id));
 			Ok(())
 		}
 	}

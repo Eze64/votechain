@@ -1,5 +1,5 @@
 use crate as pallet_votechain;
-use frame_support::traits::{ConstU16, ConstU64};
+use frame_support::traits::{ConstU16, ConstU32, ConstU64};
 use frame_system as system;
 use sp_core::H256;
 use sp_runtime::{
@@ -18,6 +18,7 @@ frame_support::construct_runtime!(
 		UncheckedExtrinsic = UncheckedExtrinsic,
 	{
 		System: frame_system::{Pallet, Call, Config, Storage, Event<T>},
+		Balances: pallet_balances::{Pallet, Call, Storage, Config<T>, Event<T>},
 		Votechain: pallet_votechain::{Pallet, Call, Storage, Event<T>},
 	}
 );
@@ -42,7 +43,7 @@ impl system::Config for Test {
 	type BlockHashCount = ConstU64<250>;
 	type Version = ();
 	type PalletInfo = PalletInfo;
-	type AccountData = ();
+	type AccountData = pallet_balances::AccountData<u64>;
 	type OnNewAccount = ();
 	type OnKilledAccount = ();
 	type SystemWeightInfo = ();
@@ -51,13 +52,25 @@ impl system::Config for Test {
 	type MaxConsumers = frame_support::traits::ConstU32<16>;
 }
 
+impl pallet_balances::Config for Test {
+	type MaxLocks = ();
+	type MaxReserves = ();
+	type ReserveIdentifier = [u8; 8];
+	type Balance = u64;
+	type DustRemoval = ();
+	type Event = Event;
+	type ExistentialDeposit = ConstU64<1>;
+	type AccountStore = System;
+	type WeightInfo = ();
+}
+
 impl pallet_votechain::Config for Test {
 	type Event = Event;
 	type Currency = Balances;
-	type ElectionMinBytes = ElectionMinBytes;
-	type ElectionMaxBytes = ElectionMaxBytes;
-	type CandidateMinBytes = CandidateMinBytes;
-	type CandidateMaxBytes = CandidateMaxBytes;
+	type ElectionMinBytes = ConstU32<8>;
+	type ElectionMaxBytes = ConstU32<4096>;
+	type CandidateMinBytes = ConstU32<8>;
+	type CandidateMaxBytes = ConstU32<4096>;
 }
 
 // Build genesis storage according to the mock runtime.
