@@ -3,6 +3,7 @@
 /// Edit this file to define custom logic or remove it if it is not needed.
 /// Learn more about FRAME and the core library of Substrate FRAME pallets:
 /// <https://docs.substrate.io/v3/runtime/frame>
+
 pub use pallet::*;
 
 #[cfg(test)]
@@ -43,6 +44,7 @@ pub mod pallet {
 	#[scale_info(skip_type_params(T))]
 	pub struct Election {
 		pub description: Vec<u8>,
+		pub is_open: bool,
 	}
 
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
@@ -79,7 +81,8 @@ pub mod pallet {
 
 	#[pallet::storage]
 	#[pallet::getter(fn election_candidates)]
-	pub(super) type ElectionCandidates<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Candidate<T>>>;
+	pub(super) type ElectionCandidates<T: Config> =
+		StorageMap<_, Twox64Concat, T::Hash, Vec<Candidate<T>>>;
 
 	#[pallet::storage]
 	#[pallet::getter(fn election_votes)]
@@ -102,6 +105,7 @@ pub mod pallet {
 		/// parameters. [something, who]
 		SomethingStored(u32, T::AccountId),
 		ElectionStored(Vec<u8>, T::Hash),
+		ElectionUpdated(bool, T::Hash),
 		CandidateStored(Vec<u8>, T::Hash),
 		VoteStored(T::Hash, T::Hash),
 	}
@@ -166,7 +170,10 @@ pub mod pallet {
 
 		#[pallet::weight(10_000)]
 		#[transactional]
-		pub fn create_election(origin: OriginFor<T>, description: Vec<u8>) -> DispatchResult {
+		pub fn create_election(
+			origin: OriginFor<T>,
+			description: Vec<u8>,
+		) -> DispatchResult {
 			ensure_root(origin)?;
 
 			ensure!(
@@ -181,6 +188,7 @@ pub mod pallet {
 
 			let election = Election {
 				description: description.clone(),
+				is_open: true,
 			};
 
 			let election_id = T::Hashing::hash_of(&election);
@@ -194,6 +202,32 @@ pub mod pallet {
 
 			Self::deposit_event(Event::ElectionStored(description, election_id));
 
+			Ok(())
+		}
+
+		#[pallet::weight(5_000)]
+		pub fn close_election(
+			origin: OriginFor<T>,
+			election_id: T::Hash,
+		) -> DispatchResult {
+			ensure_root(origin)?;
+
+			let is_open = false;
+
+			<Elections<T>>::mutate(election_id, |elections| match elections {
+				None => Err(()),
+				Some(election) => {
+					if election.is_open {
+						election.is_open = is_open;
+						Ok(())
+					} else {
+						Err(())
+					}
+				}
+			})
+			.map_err(|_| <Error<T>>::ElectionNotFound)?;
+
+			Self::deposit_event(Event::ElectionUpdated(is_open, election_id));
 			Ok(())
 		}
 
@@ -213,7 +247,6 @@ pub mod pallet {
 				(candidate_name.len() as u32) < T::CandidateMaxBytes::get(),
 				<Error<T>>::CandidateTooManyBytes
 			);
-			
 			let candidate = Candidate {
 				candidate_name: candidate_name.clone(),
 				election_id: election_id.clone(),
@@ -221,15 +254,17 @@ pub mod pallet {
 			let candidate_id = T::Hashing::hash_of(&candidate);
 			let candidate_votes_vec: Vec<Vote<T>> = Vec::new();
 
-			<ElectionCandidates<T>>::mutate(election_id, |election_candidates| match election_candidates {
-				None => Err(()),
-				Some(vec) => {
-					vec.push(candidate.clone());
+			<ElectionCandidates<T>>::mutate(election_id, |election_candidates| {
+				match election_candidates {
+					None => Err(()),
+					Some(vec) => {
+						vec.push(candidate.clone());
 
-					<Candidates<T>>::insert(candidate_id, candidate);
-					<CandidateVotes<T>>::insert(candidate_id, candidate_votes_vec);
+						<Candidates<T>>::insert(candidate_id, candidate);
+						<CandidateVotes<T>>::insert(candidate_id, candidate_votes_vec);
 
-					Ok(())
+						Ok(())
+					}
 				}
 			})
 			.map_err(|_| <Error<T>>::ElectionNotFound)?;
@@ -244,6 +279,7 @@ pub mod pallet {
 			candidate_id: T::Hash,
 			election_id: T::Hash,
 		) -> DispatchResult {
+
 			let vote_author = ensure_signed(origin)?;
 
 			let vote = Vote {
@@ -251,6 +287,18 @@ pub mod pallet {
 				candidate_id: candidate_id.clone(),
 				election_id: election_id.clone(),
 			};
+
+			<Elections<T>>::mutate(election_id, |elections| match elections {
+				None => Err(()),
+				Some(election) => {
+					if election.is_open {
+						Ok(())
+					} else {
+						Err(())
+					}
+				}
+			})
+			.map_err(|_| <Error<T>>::ElectionNotFound)?;
 
 			<ElectionVotes<T>>::mutate(election_id, |election_votes| match election_votes {
 				None => Err(()),
