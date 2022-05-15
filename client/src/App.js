@@ -10,6 +10,7 @@ import Substrate from './Substrate'
 import {
   AddCandidates,
   CreateElection,
+  CloseElection,
   ElectionResult,
   Vote,
 } from './votechain'
@@ -56,6 +57,7 @@ function Main() {
       <Routes>
         <Route exact path="/" element={<h1>Votechain</h1>} />
         <Route exact path="/createelection" element={<CreateElection />} />
+        <Route exact path="/closeelection" element={<CloseElection />} />
         <Route exact path="/addcandidates" element={<AddCandidates />} />
         <Route exact path="/vote" element={<Vote />} />
         <Route exact path="/results" element={<ElectionResult />} />

@@ -23,7 +23,8 @@ const Navbar = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  const onClick = (_, { name }) => setCurrentPage(name)
+  const onClick = (_, { state }) => setCurrentPage(state)
+
   return (
     <>
       <Menu
@@ -41,20 +42,31 @@ const Navbar = () => {
           as={Link}
           to={'/'}
           active={currentPage === 'home'}
+          state="home"
           onClick={onClick}
           name="home"
         />
         <Menu.Item
           as={Link}
           to={'/createelection'}
-          active={currentPage === 'create election'}
+          active={currentPage === 'createelection'}
+          state="createelection"
           onClick={onClick}
           name="create election"
         />
         <Menu.Item
           as={Link}
+          to={'/closeelection'}
+          active={currentPage === 'closeelection'}
+          state="closeelection"
+          onClick={onClick}
+          name="close election"
+        />
+        <Menu.Item
+          as={Link}
           to={'/addcandidates'}
-          active={currentPage === 'add candidate'}
+          active={currentPage === 'addcandidate'}
+          state="addcandidate"
           onClick={onClick}
           name="add candidate"
         />
@@ -62,6 +74,7 @@ const Navbar = () => {
           as={Link}
           to={'/vote'}
           active={currentPage === 'vote'}
+          state="vote"
           onClick={onClick}
           name="vote"
         />
@@ -69,6 +82,7 @@ const Navbar = () => {
           as={Link}
           to={'/results'}
           active={currentPage === 'results'}
+          state="results"
           onClick={onClick}
           name="results"
         />
