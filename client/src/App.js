@@ -2,6 +2,7 @@ import React, { createRef } from 'react'
 import { Dimmer, Loader, Grid, Message, Sticky } from 'semantic-ui-react'
 import 'semantic-ui-css/semantic.min.css'
 import { Routes, Route } from 'react-router-dom'
+import { VotechainProvider } from './votechain/VotechainContext'
 
 import { SubstrateContextProvider, useSubstrateState } from './substrate-lib'
 import Navbar from './Navbar'
@@ -67,7 +68,9 @@ function Main() {
 export default function App() {
   return (
     <SubstrateContextProvider>
-      <Main />
+      <VotechainProvider>
+        <Main />
+      </VotechainProvider>
     </SubstrateContextProvider>
   )
 }

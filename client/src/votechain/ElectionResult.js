@@ -1,8 +1,8 @@
-import { hexToString } from '@polkadot/util'
+// import { hexToString } from '@polkadot/util'
 import { useState, useEffect } from 'react'
 import { Container, Grid, Form, Table } from 'semantic-ui-react'
 
-import { useSubstrateState } from '../substrate-lib'
+import { useVotechainContext } from './VotechainContext'
 
 const ElectionResult = () => {
   return (
@@ -22,74 +22,35 @@ const ElectionResult = () => {
 }
 
 const ElectionResultForm = () => {
-  const { api } = useSubstrateState()
+  const {
+    elections,
+    candidates,
+    votes,
+    fetchElections,
+    fetchCandidates,
+    fetchVotes,
+  } = useVotechainContext()
 
   const [formState, setFormState] = useState({
-    electionOptions: [],
-    candidatesList: [],
-    votesList: [],
     electionId: '',
   })
 
-  const { electionOptions, candidatesList, votesList, electionId } = formState
+  const { electionId } = formState
 
-  const onElectionChange = (_, data) => {
-    const { value } = data
-
-    setFormState(prev => ({ ...prev, electionId: value }))
+  const onChange = (_, data) => {
+    setFormState(prev => ({ ...prev, [data.state]: data.value }))
   }
 
   useEffect(() => {
-    const fetchElections = async () => {
-      let electionsList = await api.query.votechain.elections.entries()
-
-      electionsList = electionsList.map(([id, desc]) => {
-        const elecId = id.toHuman()[0]
-        const elecName = hexToString(desc.toHuman().description)
-        return {
-          key: elecId,
-          value: elecId,
-          text: elecName,
-        }
-      })
-
-      setFormState(prev => ({ ...prev, electionOptions: electionsList }))
-    }
-
     fetchElections()
-  }, [api])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
-    const fetchCandidates = async () => {
-      let candidatesList = await api.query.votechain.candidates.entries()
-      let votesList = await api.query.votechain.electionVotes(electionId)
-      votesList = votesList.toHuman()
-
-      candidatesList = candidatesList
-        .map(([id, desc]) => {
-          const candId = id.toHuman()[0]
-          const { candidateName: candName, electionId: elecId } = desc.toHuman()
-
-          return {
-            candId,
-            candName,
-            elecId,
-          }
-        })
-        .filter(x => x.elecId === electionId)
-        .map(({ candId, candName }) => {
-          return {
-            key: candId,
-            value: candId,
-            text: candName,
-          }
-        })
-
-      setFormState(prev => ({ ...prev, candidatesList, votesList }))
-    }
-
-    fetchCandidates()
-  }, [electionId, api])
+    fetchCandidates(electionId)
+    fetchVotes(electionId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [electionId])
 
   return (
     <>
@@ -98,8 +59,9 @@ const ElectionResultForm = () => {
           <Form.Select
             fluid
             label="Election"
-            onChange={onElectionChange}
-            options={electionOptions}
+            state="electionId"
+            onChange={onChange}
+            options={elections}
             placeholder="Select the election"
           />
         </Form.Field>
@@ -113,15 +75,14 @@ const ElectionResultForm = () => {
             </Table.Row>
           </Table.Header>
           <Table.Body>
-            {candidatesList &&
-              candidatesList.map(cand => {
+            {candidates &&
+              candidates.map(cand => {
                 return (
                   <Table.Row key={cand.key}>
                     <Table.Cell>{cand.text}</Table.Cell>
                     <Table.Cell>
-                      {votesList
-                        ? votesList.filter(x => x.candidateId === cand.key)
-                            .length
+                      {votes
+                        ? votes.filter(x => x.candidateId === cand.key).length
                         : '0'}
                     </Table.Cell>
                   </Table.Row>
@@ -129,7 +90,7 @@ const ElectionResultForm = () => {
               })}
             <Table.Row>
               <Table.Cell>Total:</Table.Cell>
-              <Table.Cell>{votesList ? votesList.length : '0'}</Table.Cell>
+              <Table.Cell>{votes ? votes.length : '0'}</Table.Cell>
             </Table.Row>
           </Table.Body>
         </Table>

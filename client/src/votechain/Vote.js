@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { Container, Grid, Form } from 'semantic-ui-react'
-import { hexToString } from '@polkadot/util'
 
 import { TxButton } from '../substrate-lib/components'
-import { useSubstrateState } from '../substrate-lib'
+import { useVotechainContext } from './VotechainContext'
+
 import Events from '../Events'
 
 const Vote = () => {
@@ -27,84 +27,30 @@ const Vote = () => {
 }
 
 const VoteForm = () => {
-  const { api } = useSubstrateState()
+  const { elections, candidates, fetchElections, fetchCandidates } =
+    useVotechainContext()
 
   const [status, setStatus] = useState(null)
   const [formState, setFormState] = useState({
-    electionOptions: [],
-    candidateOptions: [],
     electionId: '',
     candidateId: '',
   })
 
-  const { electionOptions, candidateOptions, electionId, candidateId } =
-    formState
+  const { electionId, candidateId } = formState
+
+  const onChange = (_, data) => {
+    setFormState(prev => ({ ...prev, [data.state]: data.value }))
+  }
 
   useEffect(() => {
-    const fetchElections = async () => {
-      let electionsList = await api.query.votechain.elections.entries()
-
-      electionsList = electionsList.map(([id, desc]) => {
-        const elecId = id.toHuman()[0]
-        const elecName = hexToString(desc.toHuman().description)
-        return {
-          key: elecId,
-          value: elecId,
-          text: elecName,
-        }
-      })
-
-      setFormState(prev => ({ ...prev, electionOptions: electionsList }))
-    }
-
     fetchElections()
-  }, [api])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
-    const fetchCandidates = async () => {
-      let candidatesList = await api.query.votechain.candidates.entries()
-
-      // let candidates2 = await api.query.votechain.electionCandidates(electionId)
-
-      // console.log('candidates2', candidates2.toHuman())
-
-      candidatesList = candidatesList
-        .map(([id, desc]) => {
-          const candId = id.toHuman()[0]
-          const { candidateName: candName, electionId: elecId } = desc.toHuman()
-
-          return {
-            candId,
-            candName,
-            elecId,
-          }
-        })
-        .filter(x => x.elecId === electionId)
-        .map(({ candId, candName }) => {
-          return {
-            key: candId,
-            value: candId,
-            text: candName,
-          }
-        })
-
-      setFormState(prev => ({ ...prev, candidateOptions: candidatesList }))
-    }
-
-    fetchCandidates()
-  }, [electionId, api])
-
-  const onElectionChange = (_, data) => {
-    const { value } = data
-
-    setFormState(prev => ({ ...prev, electionId: value }))
-  }
-
-  const onCandidateChange = (_, data) => {
-    const { value } = data
-
-    setFormState(prev => ({ ...prev, candidateId: value }))
-  }
+    fetchCandidates(electionId)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [electionId])
 
   return (
     <Form>
@@ -112,8 +58,9 @@ const VoteForm = () => {
         <Form.Select
           fluid
           label="Election"
-          onChange={onElectionChange}
-          options={electionOptions}
+          state="electionId"
+          onChange={onChange}
+          options={elections}
           placeholder="Select the election"
         />
       </Form.Field>
@@ -121,8 +68,9 @@ const VoteForm = () => {
         <Form.Select
           fluid
           label="Candidates"
-          onChange={onCandidateChange}
-          options={candidateOptions}
+          state="candidateId"
+          onChange={onChange}
+          options={candidates}
           placeholder="Select the candidate"
         />
       </Form.Field>

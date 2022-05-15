@@ -1,9 +1,8 @@
 import { useState, useEffect } from 'react'
 import { Container, Grid, Form, Input } from 'semantic-ui-react'
-import { hexToString } from '@polkadot/util'
 
 import { TxButton } from '../substrate-lib/components'
-import { useSubstrateState } from '../substrate-lib'
+import { useVotechainContext } from './VotechainContext'
 import Events from '../Events'
 
 const AddCandidates = () => {
@@ -27,47 +26,24 @@ const AddCandidates = () => {
 }
 
 const AddCandidatesForm = () => {
-  const { api } = useSubstrateState()
+  const { elections, fetchElections } = useVotechainContext()
 
   const [status, setStatus] = useState(null)
   const [formState, setFormState] = useState({
-    electionOptions: [],
     candidateName: '',
     electionId: '',
   })
 
-  useEffect(() => {
-    const fetchElections = async () => {
-      let electionsList = await api.query.votechain.elections.entries()
-
-      electionsList = electionsList.map(([id, desc]) => {
-        const elecId = id.toHuman()[0]
-        const elecName = hexToString(desc.toHuman().description)
-        // const elecName = desc.toHuman().description
-        return {
-          key: elecId,
-          value: elecId,
-          text: elecName,
-        }
-      })
-
-      setFormState(prev => ({ ...prev, electionOptions: electionsList }))
-    }
-
-    fetchElections()
-  }, [api])
+  const { candidateName, electionId } = formState
 
   const onChange = (_, data) => {
     setFormState(prev => ({ ...prev, [data.state]: data.value }))
   }
 
-  const onChangeSelect = (_, data) => {
-    const { value } = data
-
-    setFormState(prev => ({ ...prev, electionId: value }))
-  }
-
-  const { electionOptions, candidateName, electionId } = formState
+  useEffect(() => {
+    fetchElections()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   return (
     <Form>
@@ -75,8 +51,9 @@ const AddCandidatesForm = () => {
         <Form.Select
           fluid
           label="Election"
-          onChange={onChangeSelect}
-          options={electionOptions}
+          state="electionId"
+          onChange={onChange}
+          options={elections}
           placeholder="Select the election"
         />
       </Form.Field>

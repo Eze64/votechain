@@ -112,7 +112,6 @@ const LoginModal = ({
   const handleLogin = () => {
     try {
       const keyringKey = keyring.getPair(key)
-      console.log('keyringKey', keyringKey)
       setCurrentAccount(keyringKey)
       setErrorMsg('')
       setOpenModal(false)
