@@ -1,18 +1,36 @@
 import React, { useState, useEffect } from 'react'
 import { Menu, Modal, Button, Header, Input, Message } from 'semantic-ui-react'
 import { Link, useLocation } from 'react-router-dom'
+import { menuItens } from './votechain'
 
 import { useSubstrate } from './substrate-lib'
 
 const Navbar = () => {
   const [currentPage, setCurrentPage] = useState('home')
   const [openModal, setOpenModal] = useState(false)
+  const [isSudo, setIsSudo] = useState(false)
   const { pathname } = useLocation()
 
   const {
     setCurrentAccount,
-    state: { keyring, currentAccount },
+    state: { api, keyring, currentAccount },
   } = useSubstrate()
+
+  const checkSudo = acctPair => {
+    ;(async function () {
+      if (!api || !api.query.sudo) {
+        setIsSudo(false)
+      }
+
+      const sudoKey = await api.query.sudo.key()
+
+      if (!sudoKey || !acctPair) {
+        setIsSudo(false)
+      }
+
+      setIsSudo(acctPair.address === sudoKey.toString())
+    })()
+  }
 
   useEffect(() => {
     if (pathname.length > 1) {
@@ -38,54 +56,22 @@ const Navbar = () => {
           paddingBottom: '1em',
         }}
       >
-        <Menu.Item
-          as={Link}
-          to={'/'}
-          active={currentPage === 'home'}
-          state="home"
-          onClick={onClick}
-          name="home"
-        />
-        <Menu.Item
-          as={Link}
-          to={'/createelection'}
-          active={currentPage === 'createelection'}
-          state="createelection"
-          onClick={onClick}
-          name="create election"
-        />
-        <Menu.Item
-          as={Link}
-          to={'/closeelection'}
-          active={currentPage === 'closeelection'}
-          state="closeelection"
-          onClick={onClick}
-          name="close election"
-        />
-        <Menu.Item
-          as={Link}
-          to={'/addcandidates'}
-          active={currentPage === 'addcandidate'}
-          state="addcandidate"
-          onClick={onClick}
-          name="add candidate"
-        />
-        <Menu.Item
-          as={Link}
-          to={'/vote'}
-          active={currentPage === 'vote'}
-          state="vote"
-          onClick={onClick}
-          name="vote"
-        />
-        <Menu.Item
-          as={Link}
-          to={'/results'}
-          active={currentPage === 'results'}
-          state="results"
-          onClick={onClick}
-          name="results"
-        />
+        {menuItens.map(item => {
+          if (!isSudo && item.sudo) {
+            return
+          }
+          return (
+            <Menu.Item
+              key={item.state}
+              as={Link}
+              to={item.to}
+              active={currentPage === item.state}
+              state={item.state}
+              onClick={onClick}
+              name={item.name}
+            />
+          )
+        })}
         <Menu.Menu position="right">
           {currentAccount ? (
             <Menu.Item
@@ -94,6 +80,7 @@ const Navbar = () => {
               name="Logout"
               onClick={() => {
                 setCurrentAccount(null)
+                setIsSudo(false)
                 setCurrentPage('home')
               }}
             />
@@ -108,6 +95,7 @@ const Navbar = () => {
           setOpenModal={setOpenModal}
           setCurrentAccount={setCurrentAccount}
           keyring={keyring}
+          checkSudo={checkSudo}
         />
       )}
     </>
@@ -118,6 +106,7 @@ const LoginModal = ({
   openModal,
   setOpenModal,
   setCurrentAccount,
+  checkSudo,
   keyring,
 }) => {
   const [key, setKey] = useState('')
@@ -129,6 +118,7 @@ const LoginModal = ({
       setCurrentAccount(keyringKey)
       setErrorMsg('')
       setOpenModal(false)
+      checkSudo(keyringKey)
     } catch (error) {
       setErrorMsg('Fail to Login')
     }

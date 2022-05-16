@@ -9,6 +9,7 @@ import Navbar from './Navbar'
 import Substrate from './Substrate'
 import {
   AddCandidates,
+  Blocks,
   CreateElection,
   CloseElection,
   ElectionResult,
@@ -58,9 +59,10 @@ function Main() {
         <Route exact path="/" element={<h1>Votechain</h1>} />
         <Route exact path="/createelection" element={<CreateElection />} />
         <Route exact path="/closeelection" element={<CloseElection />} />
-        <Route exact path="/addcandidates" element={<AddCandidates />} />
+        <Route exact path="/addcandidate" element={<AddCandidates />} />
         <Route exact path="/vote" element={<Vote />} />
-        <Route exact path="/results" element={<ElectionResult />} />
+        <Route exact path="/result" element={<ElectionResult />} />
+        <Route exact path="/blocks" element={<Blocks />} />
         <Route path="/substrate" element={<Substrate />} />
       </Routes>
     </div>

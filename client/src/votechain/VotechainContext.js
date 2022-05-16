@@ -6,6 +6,7 @@ const initialState = {
   elections: [],
   candidates: [],
   votes: [],
+  blocks: [],
 }
 
 const reducer = (state, action) => {
@@ -19,6 +20,10 @@ const reducer = (state, action) => {
 
   if (action.type === 'FETCH_VOTES') {
     return { ...state, votes: action.payload }
+  }
+
+  if (action.type === 'FETCH_BLOCKS') {
+    return { ...state, blocks: action.payload }
   }
 
   throw new Error(`No Matching "${action.type}" - action type`)
@@ -35,13 +40,23 @@ export const VotechainProvider = ({ children }) => {
 
     electionsList = electionsList.map(([id, desc]) => {
       const elecId = id.toHuman()[0]
-      // const elecName = desc.toHuman().description
-      const elecName = hexToString(desc.toHuman().description)
 
-      return {
-        key: elecId,
-        value: elecId,
-        text: elecName,
+      try {
+        const elecName = hexToString(desc.toHuman().description)
+
+        return {
+          key: elecId,
+          value: elecId,
+          text: elecName,
+        }
+      } catch (error) {
+        const elecName = desc.toHuman().description
+
+        return {
+          key: elecId,
+          value: elecId,
+          text: elecName,
+        }
       }
     })
 
@@ -80,9 +95,72 @@ export const VotechainProvider = ({ children }) => {
     dispatch({ type: 'FETCH_VOTES', payload: votesList })
   }
 
+  const fetchBlocks = async () => {
+    let blocksCount = await api.query.system.number()
+    let tempBlocks = []
+
+    blocksCount = blocksCount.toNumber()
+
+    for (let i = 0; i < blocksCount; i++) {
+      const blockHash = await api.rpc.chain.getBlockHash(i)
+      const signedBlock = await api.rpc.chain.getBlock(blockHash)
+      const humanBlock = signedBlock.block.toHuman()
+      const {
+        header: { number: blockNum },
+        extrinsics,
+      } = humanBlock
+
+      if (extrinsics.length > 1) {
+        extrinsics.forEach(ex => {
+          if (ex.isSigned) {
+            const {
+              nonce,
+              signer: { Id: signerId },
+              signature,
+              method: { args, method, section },
+            } = ex
+
+            if (args.call) {
+              const { call } = args
+              tempBlocks.push({
+                blockNum,
+                blockHash: blockHash.toHuman(),
+                nonce,
+                signerId,
+                signature,
+                section: call.section,
+                method: call.method,
+                args: call.args,
+              })
+            } else {
+              tempBlocks.push({
+                blockNum,
+                blockHash: blockHash.toHuman(),
+                nonce,
+                signerId,
+                signature,
+                section,
+                method,
+                args,
+              })
+            }
+          }
+        })
+      }
+    }
+
+    dispatch({ type: 'FETCH_BLOCKS', payload: tempBlocks })
+  }
+
   return (
     <VotechainContext.Provider
-      value={{ ...state, fetchElections, fetchCandidates, fetchVotes }}
+      value={{
+        ...state,
+        fetchElections,
+        fetchCandidates,
+        fetchVotes,
+        fetchBlocks,
+      }}
     >
       {children}
     </VotechainContext.Provider>
