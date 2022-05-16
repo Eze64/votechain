@@ -1,5 +1,6 @@
 import { useEffect } from 'react'
 import { Container, Grid, Table } from 'semantic-ui-react'
+import { hexToString } from '@polkadot/util'
 
 import { useVotechainContext } from './VotechainContext'
 
@@ -50,11 +51,22 @@ const Block = ({ block }) => {
                 {typeof block[key] !== 'object'
                   ? block[key]
                   : Object.keys(block[key]).map((arg, j) => {
-                      return (
-                        <div key={j}>
-                          <b>{arg}:</b> {block[key][arg]}
-                        </div>
-                      )
+                      try {
+                        return (
+                          <div key={j}>
+                            <b>{arg}:</b>{' '}
+                            {arg === 'description'
+                              ? hexToString(block[key][arg])
+                              : block[key][arg]}
+                          </div>
+                        )
+                      } catch (error) {
+                        return (
+                          <div key={j}>
+                            <b>{arg}:</b> {block[key][arg]}
+                          </div>
+                        )
+                      }
                     })}
               </Table.Cell>
             </Table.Row>
