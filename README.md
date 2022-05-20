@@ -71,6 +71,14 @@ RUST_BACKTRACE=1 ./target/release/votechain -ldebug --dev
 > - Alice//stash
 > - Bob//stash
 
+## Test Accounts
+> - 5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY - alice
+> - 5FHneW46xGXgs5mUiveU4sbTyGBzmstUspZC92UhjJM694ty - bob
+> - 5FLSigC9HGRKVhB9FiEo4Y3koPsNmBmLJbpXg2mp1hXcS59Y - charlie
+> - 5DAAnrj7VHTznn2AWBemMuyBwZWs6FNFjdyVXUeYum3PTXFy - dave
+> - 5HGjWAeFDfFCWPsjFQdVV2Msvz2XtMktvgocEZcCj68kUMaw - eve
+> - 5CiPPseXPECbkjWCa6MnjNokrgYjMqmKndv2rSnekmSK2DjL - ferdie
+
 In case of being interested in maintaining the chain' state between runs a base path must be added
 so the db can be stored in the provided folder instead of a temporal one. We could use this folder
 to store different chain databases, as a different folder will be created per different chain that
