@@ -1,15 +1,4 @@
-# Substrate Front End Template
-
-This template allows you to create a front-end application that connects to a
-[Substrate](https://github.com/paritytech/substrate) node back-end with minimal
-configuration. To learn about Substrate itself, visit the
-[Substrate Documentation](https://docs.substrate.io).
-
-The template is built with [Create React App](https://github.com/facebook/create-react-app)
-and [Polkadot js API](https://polkadot.js.org/docs/api/). Familiarity with these tools
-will be helpful, but the template strives to be self-explanatory.
-
-## Using The Template
+# Front End
 
 ### Installation
 

@@ -40,6 +40,7 @@ pub mod pallet {
 		type CandidateMaxBytes: Get<u32>;
 	}
 
+	// Data structure to create an election
 	#[derive(Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
 	pub struct Election {
@@ -47,6 +48,7 @@ pub mod pallet {
 		pub is_open: bool,
 	}
 
+	// Data structure to create a candidate
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
 	pub struct Candidate<T: Config> {
@@ -54,6 +56,7 @@ pub mod pallet {
 		pub election_id: T::Hash,
 	}
 
+	// Data structure to create a vote
 	#[derive(Clone, Encode, Decode, PartialEq, RuntimeDebug, TypeInfo)]
 	#[scale_info(skip_type_params(T))]
 	pub struct Vote<T: Config> {
@@ -75,23 +78,28 @@ pub mod pallet {
 	// https://docs.substrate.io/v3/runtime/storage#declaring-storage-items
 	pub type Something<T> = StorageValue<_, u32>;
 
+	// Getter method to get election data, (i.e., description, is_open)
 	#[pallet::storage]
 	#[pallet::getter(fn elections)]
 	pub(super) type Elections<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Election>;
 
+	// Getter method to obtain the data of candidates registered in the election
 	#[pallet::storage]
 	#[pallet::getter(fn election_candidates)]
 	pub(super) type ElectionCandidates<T: Config> =
 		StorageMap<_, Twox64Concat, T::Hash, Vec<Candidate<T>>>;
 
+	// Getter method to obtain the data of votes registered in the election
 	#[pallet::storage]
 	#[pallet::getter(fn election_votes)]
 	pub(super) type ElectionVotes<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Vote<T>>>;
 
+	// Getter method to get candidate data
 	#[pallet::storage]
 	#[pallet::getter(fn candidates)]
 	pub(super) type Candidates<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Candidate<T>>;
 
+	// Getter method to get the vote data of a candidate
 	#[pallet::storage]
 	#[pallet::getter(fn candidate_votes)]
 	pub(super) type CandidateVotes<T: Config> = StorageMap<_, Twox64Concat, T::Hash, Vec<Vote<T>>>;
@@ -168,6 +176,8 @@ pub mod pallet {
 			}
 		}
 
+		// Method to create an election, verification of author permissions is done.
+		// Excess handling is done in case of errors.
 		#[pallet::weight(10_000)]
 		#[transactional]
 		pub fn create_election(
@@ -205,6 +215,8 @@ pub mod pallet {
 			Ok(())
 		}
 
+		// Method to close an election, the author's permissions are checked.
+		// Excess handling is done in case of errors.
 		#[pallet::weight(5_000)]
 		pub fn close_election(
 			origin: OriginFor<T>,
@@ -231,6 +243,9 @@ pub mod pallet {
 			Ok(())
 		}
 
+		// Method to create a candidate, verification of author permissions is done.
+		// Excess handling is done in case of errors.
+		// The candidate is associated with the election.
 		#[pallet::weight(5_000)]
 		pub fn create_candidate(
 			origin: OriginFor<T>,
@@ -273,6 +288,8 @@ pub mod pallet {
 			Ok(())
 		}
 
+		// Method to create a vote. It is checked if the voter has already voted before, if yes, it will generate an exception.
+		// It is also checked if the election is open, if not, it also generates an exception.
 		#[pallet::weight(5_000)]
 		pub fn create_vote(
 			origin: OriginFor<T>,
