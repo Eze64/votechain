@@ -5,6 +5,7 @@ import { menuItens } from './votechain'
 
 import { useSubstrate } from './substrate-lib'
 
+// Navbar component, responsavel pela navegação entre as telas do sistema
 const Navbar = () => {
   const [currentPage, setCurrentPage] = useState('home')
   const [openModal, setOpenModal] = useState(false)
@@ -56,22 +57,23 @@ const Navbar = () => {
           paddingBottom: '1em',
         }}
       >
-        {menuItens.map(item => {
-          if (!isSudo && item.sudo) {
-            return
+        {menuItens.reduce((acc, curr) => {
+          if (!isSudo && curr.sudo) {
+            return acc
           }
-          return (
+          return [
+            ...acc,
             <Menu.Item
-              key={item.state}
+              key={curr.state}
               as={Link}
-              to={item.to}
-              active={currentPage === item.state}
-              state={item.state}
+              to={curr.to}
+              active={currentPage === curr.state}
+              state={curr.state}
               onClick={onClick}
-              name={item.name}
-            />
-          )
-        })}
+              name={curr.name}
+            />,
+          ]
+        }, [])}
         <Menu.Menu position="right">
           {currentAccount ? (
             <Menu.Item
@@ -101,6 +103,9 @@ const Navbar = () => {
     </>
   )
 }
+
+// Login modal, responsavel por inserir a chave do utilizador e realizar a autenticação
+// Se a chave for invalida mostrar mensagem de erro
 
 const LoginModal = ({
   openModal,

@@ -4,6 +4,7 @@ import { Container, Grid, Form, Table } from 'semantic-ui-react'
 
 import { useVotechainContext } from './VotechainContext'
 
+// CloseElection component, tela responsavel mostrar os resultados da eleição
 const ElectionResult = () => {
   return (
     <>
@@ -21,6 +22,7 @@ const ElectionResult = () => {
   )
 }
 
+// formulario e tabela com os resultados
 const ElectionResultForm = () => {
   const {
     elections,

@@ -5,6 +5,7 @@ import { TxButton } from '../substrate-lib/components'
 import { useVotechainContext } from './VotechainContext'
 import Events from '../Events'
 
+// CloseElection component, tela responsavel por finalizar uma eleição
 const CloseElection = () => {
   return (
     <>
@@ -25,6 +26,7 @@ const CloseElection = () => {
   )
 }
 
+// formulario
 const CloseElectionForm = () => {
   const { elections, fetchElections } = useVotechainContext()
 

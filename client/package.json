@@ -13,7 +13,7 @@
     "polkadot-js"
   ],
   "scripts": {
-    "start": "react-app-rewired start",
+    "start": "HTTPS=true SSL_CRT_FILE=nginx-selfsigned.crt SSL_KEY_FILE=nginx-selfsigned.key react-app-rewired start",
     "build": "react-app-rewired build",
     "test": "CI=true react-app-rewired test",
     "eject": "react-scripts eject",

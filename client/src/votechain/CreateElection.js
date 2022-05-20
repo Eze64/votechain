@@ -3,6 +3,7 @@ import { Container, Grid, Form, Input } from 'semantic-ui-react'
 import { TxButton } from '../substrate-lib/components'
 import Events from '../Events'
 
+// CreateElection component, tela responsavel por criar uma eleição
 const CreateElection = () => {
   return (
     <>
@@ -23,6 +24,7 @@ const CreateElection = () => {
   )
 }
 
+// formulario
 const CreateElectionForm = () => {
   const [status, setStatus] = useState(null)
   const [formState, setFormState] = useState({ electionName: '' })

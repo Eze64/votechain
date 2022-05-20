@@ -5,6 +5,7 @@ import { TxButton } from '../substrate-lib/components'
 import { useVotechainContext } from './VotechainContext'
 import Events from '../Events'
 
+// AddCandidates component, tela responsavel por adicionar um candidato a eleição
 const AddCandidates = () => {
   return (
     <>
@@ -25,6 +26,7 @@ const AddCandidates = () => {
   )
 }
 
+// formulario
 const AddCandidatesForm = () => {
   const { elections, fetchElections } = useVotechainContext()
 

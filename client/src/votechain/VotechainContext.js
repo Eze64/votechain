@@ -31,10 +31,12 @@ const reducer = (state, action) => {
 
 const VotechainContext = React.createContext()
 
+// Context Provider responsavel por centralizar as funções de acesso a votechain e as informações retornadas
 export const VotechainProvider = ({ children }) => {
   const { api } = useSubstrateState()
   const [state, dispatch] = useReducer(reducer, initialState)
 
+  // Buscar todas as eleições
   const fetchElections = async () => {
     let electionsList = await api.query.votechain.elections.entries()
 
@@ -63,6 +65,7 @@ export const VotechainProvider = ({ children }) => {
     dispatch({ type: 'FETCH_ELECTIONS', payload: electionsList })
   }
 
+  // Buscar todas os candidatos de uma determinada eleições
   const fetchCandidates = async electionId => {
     let candidatesList = await api.query.votechain.candidates.entries()
 
@@ -88,6 +91,7 @@ export const VotechainProvider = ({ children }) => {
     dispatch({ type: 'FETCH_CANDIDATES', payload: candidatesList })
   }
 
+  // Buscar todas os votos de uma determinada eleições
   const fetchVotes = async electionId => {
     let votesList = await api.query.votechain.electionVotes(electionId)
     votesList = votesList.toHuman()
@@ -95,6 +99,7 @@ export const VotechainProvider = ({ children }) => {
     dispatch({ type: 'FETCH_VOTES', payload: votesList })
   }
 
+  // Buscar as informações de todos os blocks
   const fetchBlocks = async () => {
     let blocksCount = await api.query.system.number()
     let tempBlocks = []

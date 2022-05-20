@@ -6,6 +6,7 @@ import { useVotechainContext } from './VotechainContext'
 
 import Events from '../Events'
 
+// Vote component, tela responsavel pela votação
 const Vote = () => {
   return (
     <>
@@ -26,6 +27,7 @@ const Vote = () => {
   )
 }
 
+// formulario
 const VoteForm = () => {
   const { elections, candidates, fetchElections, fetchCandidates } =
     useVotechainContext()

@@ -4,6 +4,7 @@ import { hexToString } from '@polkadot/util'
 
 import { useVotechainContext } from './VotechainContext'
 
+// Blocks component, tela responsavel por mostrar as informações dos blocos da blockchain
 const Blocks = () => {
   const { blocks, fetchBlocks } = useVotechainContext()
 
@@ -31,6 +32,7 @@ const Blocks = () => {
   )
 }
 
+// Block component, responsavel por apresentar a informação de um bloco da blockchain
 const Block = ({ block }) => {
   return (
     <Table celled compact>
