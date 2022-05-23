@@ -1,8 +1,8 @@
 #!/bin/sh
 
-./target/release/substrate \
---base-path /tmp/substrate \
---chain local \
+./target/release/votechain \
+--base-path /tmp/votechain \
+--chain ./chainSpecLocal.json \
 --$1 \
 --port 30333 \
 --ws-port 9944 \

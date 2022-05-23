@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./target/release/substrate purge-chain --base-path /tmp/substrate --chain local -y
+./target/release/votechain purge-chain --base-path /tmp/votechain --chain ./chainSpecLocal.json -y

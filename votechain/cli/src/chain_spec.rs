@@ -393,7 +393,14 @@ pub fn development_config() -> ChainSpec {
 
 fn local_testnet_genesis() -> GenesisConfig {
 	testnet_genesis(
-		vec![authority_keys_from_seed("Alice"), authority_keys_from_seed("Bob")],
+		vec![
+			authority_keys_from_seed("Alice"),
+			authority_keys_from_seed("Bob"),
+			authority_keys_from_seed("Charlie"),
+			authority_keys_from_seed("Dave"),
+			authority_keys_from_seed("Eve"),
+			authority_keys_from_seed("Ferdie"),
+		],
 		vec![],
 		get_account_id_from_seed::<sr25519::Public>("Alice"),
 		None,

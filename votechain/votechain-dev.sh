@@ -1,3 +1,3 @@
 #!/bin/sh
 
-./target/release/substrate --dev
+./target/release/votechain --dev
